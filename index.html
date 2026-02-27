@@ -2,8 +2,6 @@
 <html lang="ko">
 
 <head>
-    <link rel="icon" type="image/png" href="moyo-icon.png">
-    <link rel="apple-touch-icon" href="moyo-icon.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>모여</title>
@@ -1500,7 +1498,7 @@
                 <div class="ob-card-title">반가워요! 👋</div>
                 <div class="ob-card-sub">앱에서 쓸 이름과 프로필을 설정해요</div>
                 <div class="avatar-grid" id="av-grid"></div>
-                <input class="inp" id="ob-name" placeholder="닉네임 입력" maxlength="10" style="margin-bottom:12px">
+                <input class="inp" id="ob-name" placeholder="닉네임 입력 (예: 임채연)" maxlength="10" style="margin-bottom:12px">
                 <button class="btn btn-acc btn-full" onclick="completeOnboarding()">시작하기 🚀</button>
             </div>
         </div>
@@ -1992,6 +1990,7 @@
         // ── CREATE FIRST ROOM ──
         async function createFirstRoom() {
             const roomId = genId();
+            const memberId = genId();
             const room = {
                 id: roomId,
                 name: '',
@@ -2000,16 +1999,17 @@
                 invite_code: genCode(),
             };
             await db.from('rooms').insert(room);
-            await db.from('members').insert({ id: genId(), room_id: roomId, user_id: ME.id, att: 'none' });
+            await db.from('members').insert({ id: memberId, room_id: roomId, user_id: ME.id, att: 'none' });
 
             rooms[roomId] = room;
-            members[roomId] = [{ id: genId(), room_id: roomId, user_id: ME.id, att: 'none', users: ME }];
             dates[roomId] = []; places[roomId] = []; expenses[roomId] = []; memos[roomId] = [];
 
             myRoomIds.push(roomId);
             activeRoomId = roomId;
             localStorage.setItem('moyo-my-rooms', JSON.stringify(myRoomIds));
             localStorage.setItem('moyo-active-room', activeRoomId);
+
+            await loadRoomData(roomId);
             subscribeToRoom(roomId);
         }
 
@@ -2293,18 +2293,21 @@
             const name = document.getElementById('new-meeting-name').value.trim();
             if (!name) { toast('모임 이름을 입력해 주세요'); return; }
             const roomId = genId();
+            const memberId = genId();
             const room = { id: roomId, name, emoji: selectedEmoji, host_id: ME.id, invite_code: genCode() };
             await db.from('rooms').insert(room);
-            await db.from('members').insert({ id: genId(), room_id: roomId, user_id: ME.id, att: 'none' });
+            await db.from('members').insert({ id: memberId, room_id: roomId, user_id: ME.id, att: 'none' });
 
             rooms[roomId] = room;
-            members[roomId] = [{ id: genId(), room_id: roomId, user_id: ME.id, att: 'none', users: ME }];
             dates[roomId] = []; places[roomId] = []; expenses[roomId] = []; memos[roomId] = [];
 
             myRoomIds.push(roomId);
             activeRoomId = roomId;
             localStorage.setItem('moyo-my-rooms', JSON.stringify(myRoomIds));
             localStorage.setItem('moyo-active-room', activeRoomId);
+
+            // DB에서 실제 멤버 데이터 불러오기 (users 정보 포함)
+            await loadRoomData(roomId);
             subscribeToRoom(roomId);
 
             closeSheet('create');
