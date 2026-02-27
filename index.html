@@ -1,0 +1,2735 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <link rel="icon" type="image/png" href="moyo-icon.png">
+    <link rel="apple-touch-icon" href="moyo-icon.png">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>모여</title>
+    <meta name="theme-color" content="#6366f1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="모여">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --ff: 'Plus Jakarta Sans', sans-serif;
+            --bg: #f4f3f0;
+            --card: #fff;
+            --ink: #0c0b0a;
+            --ink2: #3d3935;
+            --ink3: #857f79;
+            --line: #e8e5e1;
+            --line2: #f0ede9;
+            --acc: #6366f1;
+            --acc-l: #eef2ff;
+            --acc-b: #c7d2fe;
+            --green: #16a34a;
+            --green-l: #f0fdf4;
+            --green-b: #bbf7d0;
+            --red: #dc2626;
+            --red-l: #fef2f2;
+            --red-b: #fecaca;
+            --amber: #d97706;
+            --amb-l: #fffbeb;
+            --amb-b: #fde68a;
+            --gold: #f59e0b;
+            --r: 16px;
+            --r-sm: 10px;
+            --sh: 0 1px 3px rgba(0, 0, 0, .06), 0 0 0 1px rgba(0, 0, 0, .04);
+            --sh-md: 0 4px 20px rgba(0, 0, 0, .09);
+            --sh-lg: 0 20px 60px rgba(0, 0, 0, .15);
+            --safe-b: env(safe-area-inset-bottom, 0px);
+        }
+
+        *,
+        *::before,
+        *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html {
+            height: 100%;
+            overscroll-behavior: none;
+        }
+
+        body {
+            font-family: var(--ff);
+            background: var(--bg);
+            color: var(--ink);
+            height: 100dvh;
+            overflow: hidden;
+        }
+
+        ::-webkit-scrollbar {
+            width: 0;
+        }
+
+        #app {
+            height: 100dvh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .screens {
+            flex: 1;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .screen {
+            position: absolute;
+            inset: 0;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 16px 16px calc(72px + var(--safe-b));
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(10px);
+            transition: opacity .2s ease, transform .2s ease;
+        }
+
+        .screen.on {
+            opacity: 1;
+            pointer-events: auto;
+            transform: none;
+        }
+
+        /* ONBOARDING */
+        #onboarding {
+            position: fixed;
+            inset: 0;
+            z-index: 500;
+            background: var(--acc);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 32px 28px;
+            transition: opacity .4s ease, transform .4s ease;
+        }
+
+        #onboarding.hide {
+            opacity: 0;
+            transform: scale(1.04);
+            pointer-events: none;
+        }
+
+        .ob-logo {
+            font-size: 52px;
+            margin-bottom: 16px;
+        }
+
+        .ob-title {
+            font-size: 32px;
+            font-weight: 800;
+            color: #fff;
+            letter-spacing: -.8px;
+            margin-bottom: 8px;
+        }
+
+        .ob-sub {
+            font-size: 15px;
+            color: rgba(255, 255, 255, .65);
+            margin-bottom: 40px;
+            text-align: center;
+            line-height: 1.6;
+        }
+
+        .ob-card {
+            background: #fff;
+            border-radius: 20px;
+            padding: 24px;
+            width: 100%;
+            max-width: 380px;
+            box-shadow: var(--sh-lg);
+        }
+
+        .ob-card-title {
+            font-size: 17px;
+            font-weight: 800;
+            letter-spacing: -.3px;
+            margin-bottom: 4px;
+        }
+
+        .ob-card-sub {
+            font-size: 13px;
+            color: var(--ink3);
+            margin-bottom: 20px;
+        }
+
+        .avatar-grid {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+        }
+
+        .av-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            border: 2px solid var(--line);
+            background: var(--line2);
+            font-size: 22px;
+            cursor: pointer;
+            transition: all .15s;
+        }
+
+        .av-btn.on {
+            border-color: var(--acc);
+            background: var(--acc-l);
+            transform: scale(1.1);
+        }
+
+        /* TAB BAR */
+        .tab-bar {
+            height: calc(58px + var(--safe-b));
+            padding-bottom: var(--safe-b);
+            padding-top: 7px;
+            background: rgba(255, 255, 255, .93);
+            backdrop-filter: blur(24px) saturate(180%);
+            -webkit-backdrop-filter: blur(24px) saturate(180%);
+            border-top: 1px solid var(--line);
+            display: flex;
+            flex-shrink: 0;
+        }
+
+        .tab {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 3px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            transition: transform .12s;
+        }
+
+        .tab:active {
+            transform: scale(.88);
+        }
+
+        .tab-icon {
+            width: 42px;
+            height: 26px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 99px;
+            font-size: 17px;
+            transition: background .2s;
+        }
+
+        .tab.on .tab-icon {
+            background: var(--acc-l);
+        }
+
+        .tab-lbl {
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--ink3);
+            transition: color .2s;
+            letter-spacing: -.1px;
+        }
+
+        .tab.on .tab-lbl {
+            color: var(--acc);
+        }
+
+        /* OVERLAY / SHEET */
+        .overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 300;
+            background: rgba(0, 0, 0, .45);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity .25s;
+            padding: 0;
+        }
+
+        .overlay.on {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .sheet {
+            background: var(--card);
+            border-radius: 22px 22px 0 0;
+            padding: 20px 20px calc(20px + var(--safe-b));
+            width: 100%;
+            max-width: 560px;
+            max-height: 88dvh;
+            overflow-y: auto;
+            transform: translateY(24px);
+            transition: transform .28s cubic-bezier(.4, 0, .2, 1);
+            box-shadow: var(--sh-lg);
+        }
+
+        .overlay.on .sheet {
+            transform: none;
+        }
+
+        .sheet-handle {
+            width: 36px;
+            height: 4px;
+            background: var(--line);
+            border-radius: 99px;
+            margin: 0 auto 18px;
+        }
+
+        .sheet-title {
+            font-size: 18px;
+            font-weight: 800;
+            letter-spacing: -.4px;
+            margin-bottom: 4px;
+        }
+
+        .sheet-sub {
+            font-size: 12px;
+            color: var(--ink3);
+            margin-bottom: 18px;
+        }
+
+        /* LOADING */
+        #loading {
+            position: fixed;
+            inset: 0;
+            z-index: 400;
+            background: var(--acc);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            transition: opacity .3s;
+        }
+
+        #loading.hide {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .loading-logo {
+            font-size: 48px;
+        }
+
+        .loading-text {
+            font-size: 14px;
+            font-weight: 700;
+            color: rgba(255, 255, 255, .7);
+        }
+
+        .loading-spinner {
+            width: 32px;
+            height: 32px;
+            border: 3px solid rgba(255, 255, 255, .3);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin .8s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* TYPOGRAPHY */
+        .screen-title {
+            font-size: 22px;
+            font-weight: 800;
+            letter-spacing: -.5px;
+        }
+
+        .screen-sub {
+            font-size: 13px;
+            color: var(--ink3);
+            margin-top: 2px;
+        }
+
+        .sec {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: .8px;
+            text-transform: uppercase;
+            color: var(--ink3);
+            margin: 20px 0 10px 2px;
+        }
+
+        /* CARDS */
+        .card {
+            background: var(--card);
+            border-radius: var(--r);
+            box-shadow: var(--sh);
+            overflow: hidden;
+            margin-bottom: 12px;
+        }
+
+        .card-p {
+            padding: 16px;
+        }
+
+        .card-hd {
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--line2);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-hd-ico {
+            width: 32px;
+            height: 32px;
+            border-radius: 9px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 15px;
+            flex-shrink: 0;
+        }
+
+        .card-hd-title {
+            font-size: 14px;
+            font-weight: 700;
+            letter-spacing: -.2px;
+        }
+
+        .card-hd-sub {
+            font-size: 11px;
+            color: var(--ink3);
+            margin-top: 1px;
+        }
+
+        /* HERO */
+        .hero {
+            border-radius: var(--r);
+            padding: 20px;
+            margin-bottom: 12px;
+            background: linear-gradient(135deg, #6366f1 0%, #818cf8 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::after {
+            content: '';
+            position: absolute;
+            right: -24px;
+            top: -24px;
+            width: 120px;
+            height: 120px;
+            background: rgba(255, 255, 255, .08);
+            border-radius: 50%;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            left: -30px;
+            bottom: -30px;
+            width: 100px;
+            height: 100px;
+            background: rgba(255, 255, 255, .05);
+            border-radius: 50%;
+        }
+
+        .hero-greeting {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: rgba(255, 255, 255, .6);
+            margin-bottom: 6px;
+        }
+
+        .hero-name-inp {
+            background: transparent;
+            border: none;
+            outline: none;
+            font-family: var(--ff);
+            font-size: 24px;
+            font-weight: 800;
+            color: #fff;
+            letter-spacing: -.5px;
+            width: 100%;
+            caret-color: rgba(255, 255, 255, .8);
+        }
+
+        .hero-name-inp::placeholder {
+            color: rgba(255, 255, 255, .35);
+        }
+
+        .hero-stats {
+            display: flex;
+            gap: 0;
+            margin-top: 16px;
+            padding-top: 14px;
+            border-top: 1px solid rgba(255, 255, 255, .15);
+        }
+
+        .hs {
+            flex: 1;
+            padding-right: 14px;
+            border-right: 1px solid rgba(255, 255, 255, .12);
+            margin-right: 14px;
+        }
+
+        .hs:last-child {
+            border: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .hs-n {
+            font-size: 18px;
+            font-weight: 800;
+            color: #fff;
+            letter-spacing: -.4px;
+        }
+
+        .hs-l {
+            font-size: 10px;
+            font-weight: 600;
+            color: rgba(255, 255, 255, .5);
+            letter-spacing: .3px;
+            margin-top: 1px;
+        }
+
+        /* PROFILE BTN */
+        .profile-btn {
+            position: relative;
+            z-index: 10;
+            background: rgba(255, 255, 255, .15);
+            border: none;
+            border-radius: 99px;
+            padding: 5px 10px;
+            font-size: 11px;
+            font-weight: 700;
+            color: #fff;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-family: var(--ff);
+        }
+
+        /* QUICK GRID */
+        .qg {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+        }
+
+        .qg-btn {
+            background: var(--card);
+            border-radius: var(--r-sm);
+            box-shadow: var(--sh);
+            padding: 14px 6px 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            border: none;
+            transition: all .13s;
+        }
+
+        .qg-btn:active {
+            transform: scale(.93);
+            box-shadow: none;
+        }
+
+        .qg-icon {
+            font-size: 20px;
+        }
+
+        .qg-lbl {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--ink2);
+            letter-spacing: -.1px;
+        }
+
+        .qg-val {
+            font-size: 10px;
+            color: var(--ink3);
+        }
+
+        /* MEETING CARDS */
+        .mt-card {
+            background: var(--card);
+            border-radius: var(--r);
+            box-shadow: var(--sh);
+            padding: 14px 16px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border: 1.5px solid transparent;
+            transition: all .17s;
+        }
+
+        .mt-card:active {
+            transform: scale(.98);
+        }
+
+        .mt-card.cur {
+            border-color: var(--acc);
+            background: var(--acc-l);
+        }
+
+        .mt-ico {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            background: var(--line2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .mt-card.cur .mt-ico {
+            background: var(--acc-b);
+        }
+
+        .mt-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .mt-name {
+            font-size: 14px;
+            font-weight: 700;
+            letter-spacing: -.2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .mt-meta {
+            font-size: 11px;
+            color: var(--ink3);
+            margin-top: 2px;
+        }
+
+        .mt-badge {
+            font-size: 9px;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 99px;
+            background: var(--acc);
+            color: #fff;
+            flex-shrink: 0;
+        }
+
+        .mt-host-badge {
+            font-size: 9px;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 99px;
+            background: var(--gold);
+            color: #fff;
+            flex-shrink: 0;
+        }
+
+        .mt-del {
+            width: 28px;
+            height: 28px;
+            border-radius: 8px;
+            border: none;
+            background: var(--line2);
+            color: var(--ink3);
+            cursor: pointer;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all .15s;
+            flex-shrink: 0;
+        }
+
+        .mt-del:active {
+            background: var(--red-l);
+            color: var(--red);
+        }
+
+        /* INVITE BANNER */
+        .invite-banner {
+            background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+            border: 1.5px solid var(--green-b);
+            border-radius: var(--r);
+            padding: 14px 16px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+        }
+
+        .invite-ico {
+            font-size: 24px;
+            flex-shrink: 0;
+        }
+
+        .invite-info {
+            flex: 1;
+        }
+
+        .invite-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--green);
+        }
+
+        .invite-sub {
+            font-size: 11px;
+            color: #15803d;
+            margin-top: 2px;
+        }
+
+        /* INPUTS */
+        .inp {
+            width: 100%;
+            padding: 12px 14px;
+            background: var(--line2);
+            border: 1.5px solid transparent;
+            border-radius: var(--r-sm);
+            font-size: 14px;
+            font-weight: 500;
+            font-family: var(--ff);
+            color: var(--ink);
+            outline: none;
+            transition: border-color .15s, background .15s;
+            -webkit-appearance: none;
+        }
+
+        .inp:focus {
+            background: var(--card);
+            border-color: var(--acc);
+        }
+
+        .inp::placeholder {
+            color: var(--ink3);
+            font-weight: 400;
+        }
+
+        textarea.inp {
+            resize: none;
+            line-height: 1.6;
+        }
+
+        .inp-row {
+            display: flex;
+            gap: 8px;
+        }
+
+        /* BUTTONS */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 12px 18px;
+            border-radius: var(--r-sm);
+            border: none;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: var(--ff);
+            transition: all .15s;
+            white-space: nowrap;
+            letter-spacing: -.2px;
+        }
+
+        .btn:active {
+            transform: scale(.96);
+        }
+
+        .btn-acc {
+            background: var(--acc);
+            color: #fff;
+        }
+
+        .btn-acc:active {
+            background: #5457e0;
+        }
+
+        .btn-line {
+            background: var(--card);
+            border: 1.5px solid var(--line);
+            color: var(--ink2);
+        }
+
+        .btn-green {
+            background: var(--green);
+            color: #fff;
+        }
+
+        .btn-sm {
+            padding: 9px 14px;
+            font-size: 13px;
+            border-radius: 9px;
+        }
+
+        .btn-xs {
+            padding: 6px 11px;
+            font-size: 12px;
+            border-radius: 8px;
+        }
+
+        .btn-full {
+            width: 100%;
+        }
+
+        .del-btn {
+            width: 30px;
+            height: 30px;
+            border-radius: 8px;
+            border: none;
+            background: var(--line2);
+            color: var(--ink3);
+            cursor: pointer;
+            font-size: 12px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all .15s;
+        }
+
+        .del-btn:active {
+            background: var(--red-l);
+            color: var(--red);
+        }
+
+        /* ROWS */
+        .row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 13px 16px;
+            border-bottom: 1px solid var(--line2);
+        }
+
+        .row:last-child {
+            border-bottom: none;
+        }
+
+        /* DATE */
+        .d-label {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .d-title {
+            font-size: 14px;
+            font-weight: 700;
+            letter-spacing: -.2px;
+            margin-bottom: 4px;
+        }
+
+        .vote-bar {
+            height: 3px;
+            border-radius: 99px;
+            background: var(--line2);
+            overflow: hidden;
+            margin-bottom: 4px;
+        }
+
+        .vote-fill {
+            height: 100%;
+            background: var(--acc);
+            border-radius: 99px;
+            transition: width .4s cubic-bezier(.4, 0, .2, 1);
+        }
+
+        .date-best .vote-fill {
+            background: var(--green);
+        }
+
+        .d-meta {
+            font-size: 11px;
+            color: var(--ink3);
+            font-weight: 500;
+        }
+
+        .vote-btn {
+            padding: 7px 12px;
+            border-radius: 8px;
+            border: 1.5px solid var(--line);
+            background: var(--line2);
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: var(--ff);
+            transition: all .15s;
+            color: var(--ink2);
+            white-space: nowrap;
+        }
+
+        .vote-btn:active {
+            transform: scale(.91);
+        }
+
+        .vote-btn.on {
+            background: var(--acc);
+            border-color: var(--acc);
+            color: #fff;
+        }
+
+        /* ATTENDANCE */
+        .att-bar {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--line2);
+        }
+
+        .att-chip {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 10px;
+            border-radius: 99px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .att-chip-go {
+            background: var(--green-l);
+            color: var(--green);
+        }
+
+        .att-chip-no {
+            background: var(--red-l);
+            color: var(--red);
+        }
+
+        .att-chip-maybe {
+            background: var(--amb-l);
+            color: var(--amber);
+        }
+
+        .att-chip-none {
+            background: var(--line2);
+            color: var(--ink3);
+        }
+
+        .att-btns {
+            display: flex;
+            gap: 4px;
+        }
+
+        .att-btn {
+            padding: 6px 10px;
+            border-radius: 7px;
+            border: 1.5px solid var(--line);
+            background: var(--line2);
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: var(--ff);
+            transition: all .15s;
+            color: var(--ink3);
+        }
+
+        .att-btn:active {
+            transform: scale(.9);
+        }
+
+        .att-btn.go {
+            background: var(--green-l);
+            border-color: var(--green-b);
+            color: var(--green);
+        }
+
+        .att-btn.no {
+            background: var(--red-l);
+            border-color: var(--red-b);
+            color: var(--red);
+        }
+
+        .att-btn.maybe {
+            background: var(--amb-l);
+            border-color: var(--amb-b);
+            color: var(--amber);
+        }
+
+        /* MEMBER PILL */
+        .member-area {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+
+        .mpill {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 6px 10px 6px 8px;
+            background: var(--line2);
+            border-radius: 99px;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--ink2);
+        }
+
+        .mpill-host {
+            background: var(--amb-l);
+            color: #92400e;
+        }
+
+        .mpill-me {
+            background: var(--acc-l);
+            color: var(--acc);
+        }
+
+        .mpill-x {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--ink3);
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            font-size: 9px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background .15s;
+        }
+
+        .mpill-x:hover {
+            background: var(--red);
+        }
+
+        .mpill-edit {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 11px;
+            padding: 0;
+            line-height: 1;
+            opacity: .7;
+            transition: opacity .15s;
+        }
+
+        .mpill-edit:hover {
+            opacity: 1;
+        }
+
+        .att-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .dot-go {
+            background: var(--green);
+        }
+
+        .dot-no {
+            background: var(--red);
+        }
+
+        .dot-maybe {
+            background: var(--amber);
+        }
+
+        .dot-none {
+            background: var(--line);
+        }
+
+        /* PLACE */
+        .rank {
+            font-size: 14px;
+            font-weight: 800;
+            color: var(--line);
+            width: 20px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+
+        .rank.top {
+            color: var(--acc);
+        }
+
+        .pl-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .pl-name {
+            font-size: 14px;
+            font-weight: 700;
+            letter-spacing: -.2px;
+        }
+
+        .pl-meta {
+            font-size: 11px;
+            color: var(--ink3);
+            margin-top: 2px;
+        }
+
+        .like-btn {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 7px 11px;
+            border-radius: 8px;
+            border: 1.5px solid var(--line);
+            background: var(--line2);
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: var(--ff);
+            transition: all .15s;
+            color: var(--ink3);
+        }
+
+        .like-btn:active {
+            transform: scale(.9);
+        }
+
+        .like-btn.on {
+            background: var(--red-l);
+            border-color: var(--red-b);
+            color: var(--red);
+        }
+
+        /* DUTCH */
+        .dutch-hero {
+            background: var(--ink);
+            border-radius: var(--r);
+            padding: 20px;
+            margin-bottom: 12px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dutch-hero::after {
+            content: '';
+            position: absolute;
+            right: -20px;
+            bottom: -20px;
+            width: 90px;
+            height: 90px;
+            background: rgba(255, 255, 255, .04);
+            border-radius: 50%;
+        }
+
+        .dh-label {
+            font-size: 10px;
+            font-weight: 700;
+            color: rgba(255, 255, 255, .4);
+            letter-spacing: 1px;
+            margin-bottom: 4px;
+        }
+
+        .dh-amt {
+            font-size: 36px;
+            font-weight: 800;
+            color: #fff;
+            letter-spacing: -1.5px;
+            line-height: 1;
+        }
+
+        .dh-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-top: 14px;
+            padding-top: 14px;
+            border-top: 1px solid rgba(255, 255, 255, .1);
+        }
+
+        .dh-per {
+            font-size: 12px;
+            font-weight: 600;
+            color: rgba(255, 255, 255, .5);
+        }
+
+        .dh-per-amt {
+            font-size: 18px;
+            font-weight: 800;
+            color: rgba(255, 255, 255, .9);
+        }
+
+        .dh-count {
+            font-size: 12px;
+            font-weight: 600;
+            color: rgba(255, 255, 255, .4);
+        }
+
+        .settle-card {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 14px;
+            border-radius: var(--r-sm);
+            background: var(--line2);
+            margin-bottom: 8px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .sf {
+            color: var(--red);
+            font-weight: 700;
+        }
+
+        .st {
+            color: var(--green);
+            font-weight: 700;
+            flex: 1;
+        }
+
+        .sa {
+            font-size: 14px;
+            font-weight: 800;
+        }
+
+        /* MEMO */
+        .type-row {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 12px;
+        }
+
+        .type-btn {
+            padding: 7px 14px;
+            border-radius: 8px;
+            border: 1.5px solid var(--line);
+            background: var(--line2);
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: var(--ff);
+            color: var(--ink3);
+            transition: all .15s;
+        }
+
+        .type-btn.on {
+            background: var(--acc-l);
+            border-color: var(--acc-b);
+            color: var(--acc);
+        }
+
+        .memo-item {
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--line2);
+        }
+
+        .memo-item:last-child {
+            border-bottom: none;
+        }
+
+        .memo-top {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            margin-bottom: 5px;
+        }
+
+        .memo-body {
+            flex: 1;
+            font-size: 13px;
+            font-weight: 500;
+            line-height: 1.65;
+            color: var(--ink2);
+        }
+
+        .memo-time {
+            font-size: 10px;
+            color: var(--ink3);
+        }
+
+        /* BADGE */
+        .badge {
+            font-size: 9px;
+            font-weight: 700;
+            padding: 2px 7px;
+            border-radius: 99px;
+            letter-spacing: .2px;
+            flex-shrink: 0;
+        }
+
+        .badge-green {
+            background: var(--green-l);
+            color: var(--green);
+        }
+
+        .badge-acc {
+            background: var(--acc-l);
+            color: var(--acc);
+        }
+
+        .badge-red {
+            background: var(--red-l);
+            color: var(--red);
+        }
+
+        .badge-amber {
+            background: var(--amb-l);
+            color: var(--amber);
+        }
+
+        .badge-gray {
+            background: var(--line2);
+            color: var(--ink3);
+        }
+
+        .badge-gold {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        /* LOCK */
+        .lock-hint {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 10px 14px;
+            background: var(--amb-l);
+            border-radius: 8px;
+            margin-bottom: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--amber);
+        }
+
+        /* HOST BANNER */
+        .host-banner {
+            font-size: 12px;
+            font-weight: 600;
+            padding: 10px 14px;
+            border-radius: 10px;
+            background: var(--amb-l);
+            color: #92400e;
+            margin-bottom: 10px;
+        }
+
+        .host-banner-me {
+            background: var(--acc-l);
+            color: var(--acc);
+        }
+
+        .btn-text-link {
+            background: none;
+            border: none;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--acc);
+            cursor: pointer;
+            text-decoration: underline;
+            padding: 0;
+            font-family: var(--ff);
+        }
+
+        /* SHARE BOX */
+        .share-box {
+            background: var(--line2);
+            border-radius: var(--r-sm);
+            padding: 14px;
+            font-size: 12px;
+            line-height: 1.9;
+            color: var(--ink2);
+            font-weight: 500;
+            white-space: pre-wrap;
+            max-height: 200px;
+            overflow-y: auto;
+            margin-bottom: 14px;
+            font-family: monospace;
+        }
+
+        /* CODE DISPLAY */
+        .code-display {
+            background: var(--ink);
+            color: #fff;
+            border-radius: var(--r);
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 12px;
+        }
+
+        .code-label {
+            font-size: 10px;
+            font-weight: 700;
+            color: rgba(255, 255, 255, .4);
+            letter-spacing: 1.5px;
+            margin-bottom: 8px;
+        }
+
+        .code-value {
+            font-size: 36px;
+            font-weight: 800;
+            letter-spacing: 8px;
+            color: #fff;
+        }
+
+        .code-sub {
+            font-size: 11px;
+            color: rgba(255, 255, 255, .4);
+            margin-top: 8px;
+        }
+
+        /* SUGGEST */
+        .sug-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--line2);
+        }
+
+        .sug-row:last-child {
+            border-bottom: none;
+        }
+
+        .sug-info {
+            flex: 1;
+        }
+
+        .sug-name {
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .sug-meta {
+            font-size: 11px;
+            color: var(--ink3);
+            margin-top: 1px;
+        }
+
+        .sug-cats {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-bottom: 2px;
+        }
+
+        /* EMPTY */
+        .empty {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--ink3);
+        }
+
+        .empty-icon {
+            font-size: 34px;
+            opacity: .35;
+            margin-bottom: 10px;
+        }
+
+        .empty-text {
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        /* ONLINE DOT */
+        .online-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #22c55e;
+            flex-shrink: 0;
+            box-shadow: 0 0 0 2px rgba(34, 197, 94, .25);
+        }
+
+        /* TOAST */
+        .toast {
+            position: fixed;
+            bottom: calc(68px + var(--safe-b));
+            left: 50%;
+            transform: translateX(-50%) translateY(8px);
+            background: rgba(12, 11, 10, .9);
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 99px;
+            font-size: 13px;
+            font-weight: 600;
+            opacity: 0;
+            pointer-events: none;
+            transition: all .22s;
+            z-index: 999;
+            white-space: nowrap;
+            box-shadow: var(--sh-md);
+        }
+
+        .toast.on {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+
+        <!-- LOADING -->
+        <div id="loading">
+            <div class="loading-logo">🎉</div>
+            <div class="loading-spinner"></div>
+            <div class="loading-text">모여 불러오는 중...</div>
+        </div>
+
+        <!-- ONBOARDING -->
+        <div id="onboarding" style="display:none">
+            <div class="ob-logo">🎉</div>
+            <div class="ob-title">모여</div>
+            <div class="ob-sub">친구들과 모임을<br>더 쉽게 만들어요</div>
+            <div class="ob-card">
+                <div class="ob-card-title">반가워요! 👋</div>
+                <div class="ob-card-sub">앱에서 쓸 이름과 프로필을 설정해요</div>
+                <div class="avatar-grid" id="av-grid"></div>
+                <input class="inp" id="ob-name" placeholder="닉네임 입력" maxlength="10" style="margin-bottom:12px">
+                <button class="btn btn-acc btn-full" onclick="completeOnboarding()">시작하기 🚀</button>
+            </div>
+        </div>
+
+        <!-- SCREENS -->
+        <div class="screens">
+
+            <!-- HOME -->
+            <div class="screen on" id="s-home">
+                <div class="hero">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+                        <div class="hero-greeting">나의 모임</div>
+                        <button class="profile-btn" onclick="openProfile()" id="profile-btn">
+                            <span id="me-avatar">👤</span><span id="me-name-lbl">프로필</span>
+                        </button>
+                    </div>
+                    <input class="hero-name-inp" id="meeting-name" placeholder="모임 이름" maxlength="24"
+                        oninput="onNameChange()">
+                    <div class="hero-stats">
+                        <div class="hs">
+                            <div class="hs-n" id="hs-att">—</div>
+                            <div class="hs-l">참석</div>
+                        </div>
+                        <div class="hs">
+                            <div class="hs-n" id="hs-date">—</div>
+                            <div class="hs-l">날짜</div>
+                        </div>
+                        <div class="hs">
+                            <div class="hs-n" id="hs-cost">—</div>
+                            <div class="hs-l">1인당</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 멤버 카드 -->
+                <div class="card">
+                    <div class="card-hd">
+                        <div class="card-hd-ico" style="background:#f0fdf4;">👥</div>
+                        <div style="flex:1">
+                            <div class="card-hd-title">멤버</div>
+                            <div class="card-hd-sub" id="member-count-lbl">초대 링크로 참여해요</div>
+                        </div>
+                        <div class="online-dot" id="online-dot" title="실시간 연결됨"></div>
+                    </div>
+                    <div class="card-p" style="padding-bottom:10px">
+                        <div class="member-area" id="member-area"></div>
+                        <div id="member-empty-hint"></div>
+                    </div>
+                </div>
+
+                <!-- 총무 배너 -->
+                <div id="host-info-banner"></div>
+
+                <!-- 초대 배너 -->
+                <div class="invite-banner" onclick="openInvite()">
+                    <div class="invite-ico">🔗</div>
+                    <div class="invite-info">
+                        <div class="invite-title">친구 초대하기 👥</div>
+                        <div class="invite-sub">링크로 들어오면 자동으로 멤버 등록돼요</div>
+                    </div>
+                    <button class="btn btn-green btn-xs">초대</button>
+                </div>
+
+                <!-- 빠른 이동 -->
+                <div class="sec">빠른 이동</div>
+                <div class="qg">
+                    <button class="qg-btn" onclick="goTab('date')">
+                        <div class="qg-icon">📅</div>
+                        <div class="qg-lbl">일정</div>
+                        <div class="qg-val" id="qv-date">투표</div>
+                    </button>
+                    <button class="qg-btn" onclick="goTab('place')">
+                        <div class="qg-icon">📍</div>
+                        <div class="qg-lbl">장소</div>
+                        <div class="qg-val" id="qv-place">후보</div>
+                    </button>
+                    <button class="qg-btn" onclick="goTab('dutch')">
+                        <div class="qg-icon">💰</div>
+                        <div class="qg-lbl">정산</div>
+                        <div class="qg-val" id="qv-dutch">더치</div>
+                    </button>
+                    <button class="qg-btn" onclick="goTab('memo')">
+                        <div class="qg-icon">📢</div>
+                        <div class="qg-lbl">공지</div>
+                        <div class="qg-val" id="qv-memo">메모</div>
+                    </button>
+                </div>
+
+                <!-- 나의 모임 목록 -->
+                <div style="display:flex;align-items:center;justify-content:space-between;margin:20px 0 10px;">
+                    <div class="sec" style="margin:0">나의 모임</div>
+                    <button class="btn btn-acc btn-xs" onclick="openCreateMeeting()">+ 새 모임</button>
+                </div>
+                <div id="meetings-list"></div>
+            </div>
+
+            <!-- DATE -->
+            <div class="screen" id="s-date">
+                <div style="margin-bottom:20px">
+                    <div class="screen-title">일정 투표</div>
+                    <div class="screen-sub">여러 날짜에 투표 가능해요</div>
+                </div>
+                <div class="card card-p" style="margin-bottom:12px">
+                    <div class="inp-row" style="margin-bottom:8px">
+                        <input class="inp" type="date" id="date-inp">
+                        <input class="inp" placeholder="시간 (예: 오후 6시)" id="time-inp" style="max-width:130px">
+                    </div>
+                    <button class="btn btn-acc btn-full btn-sm" onclick="addDate()">날짜 추가</button>
+                </div>
+                <div class="card">
+                    <div id="date-list"></div>
+                </div>
+                <div id="att-section"></div>
+            </div>
+
+            <!-- PLACE -->
+            <div class="screen" id="s-place">
+                <div style="margin-bottom:20px">
+                    <div class="screen-title">장소 후보</div>
+                    <div class="screen-sub">❤️ 눌러서 투표 · 모두가 추가 가능</div>
+                </div>
+                <div class="card card-p">
+                    <div style="display:flex;flex-direction:column;gap:8px">
+                        <input class="inp" id="place-name" placeholder="장소 이름 (예: 홍대 이자카야)">
+                        <div class="inp-row">
+                            <input class="inp" id="place-cat" placeholder="종류 (예: 일식, 카페)">
+                            <input class="inp" id="place-price" placeholder="가격대" style="max-width:120px">
+                        </div>
+                        <button class="btn btn-acc btn-sm" style="align-self:flex-start" onclick="addPlace()">+
+                            추가</button>
+                    </div>
+                </div>
+                <div class="card card-p" style="padding-bottom:12px">
+                    <div class="sug-cats">
+                        <button class="btn btn-line btn-xs" onclick="suggestPlaces('🍖 고기')">🍖 고기</button>
+                        <button class="btn btn-line btn-xs" onclick="suggestPlaces('🍣 일식')">🍣 일식</button>
+                        <button class="btn btn-line btn-xs" onclick="suggestPlaces('🍺 술집')">🍺 술집</button>
+                        <button class="btn btn-line btn-xs" onclick="suggestPlaces('☕ 카페')">☕ 카페</button>
+                        <button class="btn btn-line btn-xs" onclick="suggestPlaces('🎤 노래방')">🎤 노래방</button>
+                        <button class="btn btn-line btn-xs" onclick="suggestPlaces('🔐 방탈출')">🔐 방탈출</button>
+                    </div>
+                    <div id="sug-wrap"></div>
+                </div>
+                <div class="card">
+                    <div id="place-list"></div>
+                </div>
+            </div>
+
+            <!-- DUTCH -->
+            <div class="screen" id="s-dutch">
+                <div style="margin-bottom:20px">
+                    <div class="screen-title">정산</div>
+                    <div class="screen-sub">총무만 지출을 추가·삭제할 수 있어요</div>
+                </div>
+                <div class="dutch-hero">
+                    <div class="dh-label">총 지출</div>
+                    <div class="dh-amt" id="d-total">₩0</div>
+                    <div class="dh-row">
+                        <div>
+                            <div class="dh-per">1인당</div>
+                            <div class="dh-per-amt" id="d-per">₩0</div>
+                        </div>
+                        <div class="dh-count" id="d-count">0명 기준</div>
+                    </div>
+                </div>
+                <div id="dutch-add-area"></div>
+                <div class="card">
+                    <div id="exp-list"></div>
+                </div>
+                <div class="sec">정산 결과</div>
+                <div id="settle-result"></div>
+                <button class="btn btn-acc btn-full" onclick="openShare()" style="margin-top:4px">🟡 카카오 공유용 요약</button>
+            </div>
+
+            <!-- MEMO -->
+            <div class="screen" id="s-memo">
+                <div style="margin-bottom:20px">
+                    <div class="screen-title">메모 · 공지</div>
+                    <div class="screen-sub">모임 관련 내용을 남겨요</div>
+                </div>
+                <div class="card card-p">
+                    <div class="type-row">
+                        <button class="type-btn on" id="tb-notice" onclick="setMemoType('notice')">📢 공지</button>
+                        <button class="type-btn" id="tb-memo" onclick="setMemoType('memo')">📝 메모</button>
+                    </div>
+                    <textarea class="inp" id="memo-inp" placeholder="내용을 입력하세요..." rows="3"
+                        style="margin-bottom:8px"></textarea>
+                    <button class="btn btn-acc btn-full btn-sm" onclick="addMemo()">등록</button>
+                </div>
+                <div class="card" style="margin-top:12px">
+                    <div id="memo-list"></div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- TAB BAR -->
+        <nav class="tab-bar">
+            <button class="tab on" id="tab-home" onclick="goTab('home')">
+                <div class="tab-icon">🏠</div>
+                <div class="tab-lbl">홈</div>
+            </button>
+            <button class="tab" id="tab-date" onclick="goTab('date')">
+                <div class="tab-icon">📅</div>
+                <div class="tab-lbl">일정</div>
+            </button>
+            <button class="tab" id="tab-place" onclick="goTab('place')">
+                <div class="tab-icon">📍</div>
+                <div class="tab-lbl">장소</div>
+            </button>
+            <button class="tab" id="tab-dutch" onclick="goTab('dutch')">
+                <div class="tab-icon">💰</div>
+                <div class="tab-lbl">정산</div>
+            </button>
+            <button class="tab" id="tab-memo" onclick="goTab('memo')">
+                <div class="tab-icon">📢</div>
+                <div class="tab-lbl">공지</div>
+            </button>
+        </nav>
+    </div>
+
+    <!-- MODALS -->
+
+    <!-- 초대 -->
+    <div class="overlay" id="ov-invite" onclick="closeOv('invite',event)">
+        <div class="sheet">
+            <div class="sheet-handle"></div>
+            <div class="sheet-title">친구 초대하기</div>
+            <div class="sheet-sub">코드나 링크를 친구에게 공유하세요</div>
+            <div class="code-display">
+                <div class="code-label">초대 코드</div>
+                <div class="code-value" id="invite-code">—</div>
+                <div class="code-sub">친구가 앱에서 이 코드를 입력하면 바로 참여해요</div>
+            </div>
+            <div class="inp-row" style="gap:8px;margin-bottom:10px">
+                <button class="btn btn-line btn-sm" onclick="closeSheet('invite')" style="flex:1">닫기</button>
+                <button class="btn btn-acc btn-sm" onclick="copyInviteLink()" style="flex:2">🔗 링크 복사</button>
+            </div>
+            <button class="btn btn-full btn-line btn-sm" onclick="copyCode()">📋 코드만 복사</button>
+        </div>
+    </div>
+
+    <!-- 참여 -->
+    <div class="overlay" id="ov-join" onclick="closeOv('join',event)">
+        <div class="sheet">
+            <div class="sheet-handle"></div>
+            <div class="sheet-title">모임 참여하기</div>
+            <div class="sheet-sub">친구에게 받은 초대 코드를 입력하세요</div>
+            <input class="inp" id="join-code-inp" placeholder="초대 코드 6자리" maxlength="6"
+                style="text-align:center;font-size:24px;font-weight:800;letter-spacing:6px;margin-bottom:12px"
+                oninput="this.value=this.value.toUpperCase()">
+            <div class="inp-row">
+                <button class="btn btn-line btn-sm" onclick="closeSheet('join')" style="flex:1">취소</button>
+                <button class="btn btn-acc btn-sm" onclick="joinMeeting()" style="flex:2">참여하기</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 새 모임 -->
+    <div class="overlay" id="ov-create" onclick="closeOv('create',event)">
+        <div class="sheet">
+            <div class="sheet-handle"></div>
+            <div class="sheet-title">새 모임 만들기</div>
+            <div class="sheet-sub">내가 총무(방장)가 돼요</div>
+            <input class="inp" id="new-meeting-name" placeholder="모임 이름 (예: 대학 동기 모임)" maxlength="24"
+                style="margin-bottom:8px">
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px" id="emoji-picker"></div>
+            <div class="inp-row">
+                <button class="btn btn-line btn-sm" onclick="closeSheet('create')" style="flex:1">취소</button>
+                <button class="btn btn-acc btn-sm" onclick="createMeeting()" style="flex:2">만들기 🎉</button>
+            </div>
+            <div style="height:12px"></div>
+            <div style="text-align:center;font-size:12px;color:var(--ink3);margin-bottom:8px">— 또는 —</div>
+            <button class="btn btn-line btn-full btn-sm" onclick="closeSheet('create');openSheet('join')">🔗 초대 코드로
+                참여하기</button>
+        </div>
+    </div>
+
+    <!-- 프로필 수정 -->
+    <div class="overlay" id="ov-profile" onclick="closeOv('profile',event)">
+        <div class="sheet">
+            <div class="sheet-handle"></div>
+            <div class="sheet-title">프로필 수정</div>
+            <div class="sheet-sub">닉네임과 아바타를 변경해요</div>
+            <div class="avatar-grid" id="profile-av-grid" style="margin-bottom:16px"></div>
+            <input class="inp" id="profile-name-inp" placeholder="새 닉네임" maxlength="10" style="margin-bottom:12px">
+            <div class="inp-row">
+                <button class="btn btn-line btn-sm" onclick="closeSheet('profile')" style="flex:1">취소</button>
+                <button class="btn btn-acc btn-sm" onclick="saveProfile()" style="flex:2">저장하기</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 총무 넘기기 -->
+    <div class="overlay" id="ov-hostpass" onclick="closeOv('hostpass',event)">
+        <div class="sheet">
+            <div class="sheet-handle"></div>
+            <div class="sheet-title">👑 총무 넘기기</div>
+            <div class="sheet-sub">새 총무를 선택하면 권한이 즉시 넘어가요</div>
+            <div id="hostpass-list"></div>
+            <div style="height:8px"></div>
+            <button class="btn btn-line btn-full btn-sm" onclick="closeSheet('hostpass')">취소</button>
+        </div>
+    </div>
+
+    <!-- 카카오 공유 -->
+    <div class="overlay" id="ov-share" onclick="closeOv('share',event)">
+        <div class="sheet">
+            <div class="sheet-handle"></div>
+            <div class="sheet-title">카카오 공유용 요약</div>
+            <div class="sheet-sub">복사해서 카카오톡에 붙여넣으세요</div>
+            <div class="share-box" id="share-text"></div>
+            <div class="inp-row">
+                <button class="btn btn-line btn-sm" onclick="closeSheet('share')" style="flex:1">닫기</button>
+                <button class="btn btn-acc btn-sm" onclick="copyShare()" style="flex:2">📋 복사하기</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script type="module">
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+
+        const SUPABASE_URL = 'https://bfiawotoncpdqelbugjf.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_5ZSJ9QDx2xDNCe2FLj-WXA_jutb24yK';
+        const db = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // ── CONSTANTS ──
+        const AVATARS = ['😀', '😎', '🥳', '🤩', '😄', '🙂', '🥰', '😜', '🤓', '🫡', '👻', '🐯', '🦊', '🐻', '🐼'];
+        const MT_EMOJIS = ['🎉', '🍻', '🏕', '🎂', '🎮', '🎤', '⚽', '🍜', '🎲', '🎸', '🏖', '✈', '🎯', '🥂'];
+        const SUGGEST_DATA = {
+            '🍖 고기': [{ name: '연탄구이 고기집', cat: '한식', price: '인당 2~3만원' }, { name: '흑돼지 전문점', cat: '한식', price: '인당 3만원' }, { name: '소고기 구이', cat: '한식', price: '인당 4~5만원' }],
+            '🍣 일식': [{ name: '이자카야', cat: '일식', price: '인당 3~4만원' }, { name: '스시 오마카세', cat: '일식', price: '인당 5만원+' }, { name: '라멘 전문점', cat: '일식', price: '인당 1.5만원' }],
+            '🍺 술집': [{ name: '수제맥주 바', cat: '술집', price: '인당 2~3만원' }, { name: '와인바', cat: '술집', price: '인당 4~5만원' }, { name: '포차', cat: '술집', price: '인당 2만원' }],
+            '☕ 카페': [{ name: '루프탑 카페', cat: '카페', price: '인당 1~1.5만원' }, { name: '보드게임 카페', cat: '카페', price: '인당 8천원' }, { name: '감성 카페', cat: '카페', price: '인당 8천원' }],
+            '🎤 노래방': [{ name: '일반 노래방', cat: '노래방', price: '인당 1~2만원' }, { name: '주류 노래방', cat: '노래방', price: '인당 3만원' }, { name: '코인노래방', cat: '노래방', price: '500원/곡' }],
+            '🔐 방탈출': [{ name: '공포 테마', cat: '방탈출', price: '인당 2만원' }, { name: '추리 테마', cat: '방탈출', price: '인당 2만원' }, { name: '어드벤처', cat: '방탈출', price: '인당 2만원' }],
+        };
+
+        // ── STATE ──
+        let ME = JSON.parse(localStorage.getItem('moyo-me') || 'null');
+        let activeRoomId = localStorage.getItem('moyo-active-room') || null;
+        let myRoomIds = JSON.parse(localStorage.getItem('moyo-my-rooms') || '[]');
+        let rooms = {}; // roomId -> room data
+        let members = {}; // roomId -> members[]
+        let dates = {}; // roomId -> dates[]
+        let places = {}; // roomId -> places[]
+        let expenses = {}; // roomId -> expenses[]
+        let memos = {}; // roomId -> memos[]
+        let memoType = 'notice';
+        let selectedEmoji = MT_EMOJIS[0];
+        let selectedAvatar = AVATARS[0];
+        let profileAvatar = null;
+        let realtimeChannels = {};
+
+        // ── HELPERS ──
+        function R() { return rooms[activeRoomId] || {}; }
+        function isHost() { return ME && R().host_id === ME.id; }
+        function getMembers() { return members[activeRoomId] || []; }
+        function getDates() { return dates[activeRoomId] || []; }
+        function getPlaces() { return places[activeRoomId] || []; }
+        function getExpenses() { return expenses[activeRoomId] || []; }
+        function getMemos() { return memos[activeRoomId] || []; }
+        function amIMember() { return getMembers().find(m => m.user_id === ME?.id); }
+        function genCode() {
+            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+            return Array.from({ length: 6 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+        }
+        function genId() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+
+        // ── INIT ──
+        async function init() {
+            initOnboarding();
+
+            // URL에서 초대 코드 확인
+            const urlCode = new URLSearchParams(location.search).get('join');
+
+            if (!ME) {
+                // 신규 사용자
+                hideLoading();
+                showOnboarding();
+                if (urlCode) {
+                    localStorage.setItem('moyo-pending-join', urlCode.toUpperCase());
+                }
+                return;
+            }
+
+            // 기존 사용자 - 방 데이터 로드
+            await loadAllRooms();
+            hideLoading();
+
+            if (urlCode) {
+                // 초대 링크로 접속
+                await handleInviteUrl(urlCode.toUpperCase());
+            } else if (!activeRoomId || !rooms[activeRoomId]) {
+                // 활성 방이 없으면 첫 번째 방으로
+                if (myRoomIds.length > 0) {
+                    activeRoomId = myRoomIds[0];
+                } else {
+                    // 방이 하나도 없으면 만들기
+                    await createFirstRoom();
+                }
+            }
+
+            await loadRoomData(activeRoomId);
+            subscribeToRoom(activeRoomId);
+            renderAll();
+        }
+
+        function hideLoading() {
+            document.getElementById('loading').classList.add('hide');
+            setTimeout(() => { document.getElementById('loading').style.display = 'none'; }, 400);
+        }
+
+        function showOnboarding() {
+            const ob = document.getElementById('onboarding');
+            ob.style.display = 'flex';
+        }
+
+        // ── ONBOARDING ──
+        function initOnboarding() {
+            const grid = document.getElementById('av-grid');
+            grid.innerHTML = AVATARS.slice(0, 8).map((a, i) =>
+                `<button class="av-btn${i === 0 ? ' on' : ''}" onclick="selectAvatar(this,'${a}')">${a}</button>`
+            ).join('');
+            selectedAvatar = AVATARS[0];
+        }
+
+        function selectAvatar(el, av) {
+            document.querySelectorAll('.av-btn').forEach(b => b.classList.remove('on'));
+            el.classList.add('on');
+            selectedAvatar = av;
+        }
+
+        async function completeOnboarding() {
+            const name = document.getElementById('ob-name').value.trim();
+            if (!name) { toast('닉네임을 입력해 주세요!'); return; }
+
+            ME = { id: genId(), name, avatar: selectedAvatar };
+            localStorage.setItem('moyo-me', JSON.stringify(ME));
+
+            // Supabase에 사용자 저장
+            await db.from('users').upsert({ id: ME.id, name: ME.name, avatar: ME.avatar });
+
+            document.getElementById('onboarding').classList.add('hide');
+            setTimeout(() => { document.getElementById('onboarding').style.display = 'none'; }, 400);
+
+            // 대기 중인 초대 코드 확인
+            const pendingCode = localStorage.getItem('moyo-pending-join');
+            if (pendingCode) {
+                localStorage.removeItem('moyo-pending-join');
+                await handleInviteUrl(pendingCode);
+                renderAll();
+                return;
+            }
+
+            // 첫 방 만들기
+            await createFirstRoom();
+            renderAll();
+            toast('환영해요, ' + name + '! 🎉');
+        }
+
+        // ── ROOM LOADING ──
+        async function loadAllRooms() {
+            if (!myRoomIds.length) return;
+            const { data } = await db.from('rooms').select('*').in('id', myRoomIds);
+            if (data) data.forEach(r => { rooms[r.id] = r; });
+        }
+
+        async function loadRoomData(roomId) {
+            if (!roomId) return;
+            const [r, m, d, p, e, mo] = await Promise.all([
+                db.from('rooms').select('*').eq('id', roomId).single(),
+                db.from('members').select('*, users(*)').eq('room_id', roomId),
+                db.from('dates').select('*').eq('room_id', roomId).order('created_at'),
+                db.from('places').select('*').eq('room_id', roomId).order('created_at'),
+                db.from('expenses').select('*').eq('room_id', roomId).order('created_at'),
+                db.from('memos').select('*').eq('room_id', roomId).order('created_at', { ascending: false }),
+            ]);
+            if (r.data) rooms[roomId] = r.data;
+            if (m.data) members[roomId] = m.data;
+            if (d.data) dates[roomId] = d.data;
+            if (p.data) places[roomId] = p.data;
+            if (e.data) expenses[roomId] = e.data;
+            if (mo.data) memos[roomId] = mo.data;
+        }
+
+        // ── CREATE FIRST ROOM ──
+        async function createFirstRoom() {
+            const roomId = genId();
+            const room = {
+                id: roomId,
+                name: '',
+                emoji: '🎉',
+                host_id: ME.id,
+                invite_code: genCode(),
+            };
+            await db.from('rooms').insert(room);
+            await db.from('members').insert({ id: genId(), room_id: roomId, user_id: ME.id, att: 'none' });
+
+            rooms[roomId] = room;
+            members[roomId] = [{ id: genId(), room_id: roomId, user_id: ME.id, att: 'none', users: ME }];
+            dates[roomId] = []; places[roomId] = []; expenses[roomId] = []; memos[roomId] = [];
+
+            myRoomIds.push(roomId);
+            activeRoomId = roomId;
+            localStorage.setItem('moyo-my-rooms', JSON.stringify(myRoomIds));
+            localStorage.setItem('moyo-active-room', activeRoomId);
+            subscribeToRoom(roomId);
+        }
+
+        // ── REALTIME ──
+        function subscribeToRoom(roomId) {
+            if (realtimeChannels[roomId]) return;
+            const ch = db.channel('room-' + roomId);
+
+            // members 변경
+            ch.on('postgres_changes', { event: '*', schema: 'public', table: 'members', filter: `room_id=eq.${roomId}` },
+                async () => {
+                    const { data } = await db.from('members').select('*, users(*)').eq('room_id', roomId);
+                    if (data) members[roomId] = data;
+                    if (activeRoomId === roomId) { renderHome(); showSync(); }
+                });
+
+            // dates 변경
+            ch.on('postgres_changes', { event: '*', schema: 'public', table: 'dates', filter: `room_id=eq.${roomId}` },
+                async () => {
+                    const { data } = await db.from('dates').select('*').eq('room_id', roomId).order('created_at');
+                    if (data) dates[roomId] = data;
+                    if (activeRoomId === roomId) { renderDates(); showSync(); }
+                });
+
+            // places 변경
+            ch.on('postgres_changes', { event: '*', schema: 'public', table: 'places', filter: `room_id=eq.${roomId}` },
+                async () => {
+                    const { data } = await db.from('places').select('*').eq('room_id', roomId).order('created_at');
+                    if (data) places[roomId] = data;
+                    if (activeRoomId === roomId) { renderPlaces(); showSync(); }
+                });
+
+            // expenses 변경
+            ch.on('postgres_changes', { event: '*', schema: 'public', table: 'expenses', filter: `room_id=eq.${roomId}` },
+                async () => {
+                    const { data } = await db.from('expenses').select('*').eq('room_id', roomId).order('created_at');
+                    if (data) expenses[roomId] = data;
+                    if (activeRoomId === roomId) { renderDutch(); showSync(); }
+                });
+
+            // memos 변경
+            ch.on('postgres_changes', { event: '*', schema: 'public', table: 'memos', filter: `room_id=eq.${roomId}` },
+                async () => {
+                    const { data } = await db.from('memos').select('*').eq('room_id', roomId).order('created_at', { ascending: false });
+                    if (data) memos[roomId] = data;
+                    if (activeRoomId === roomId) { renderMemos(); showSync(); }
+                });
+
+            // rooms 변경 (이름, 총무 등)
+            ch.on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'rooms', filter: `id=eq.${roomId}` },
+                async () => {
+                    const { data } = await db.from('rooms').select('*').eq('id', roomId).single();
+                    if (data) rooms[roomId] = data;
+                    if (activeRoomId === roomId) { renderHome(); showSync(); }
+                });
+
+            ch.subscribe();
+            realtimeChannels[roomId] = ch;
+        }
+
+        function showSync() {
+            const dot = document.getElementById('online-dot');
+            if (!dot) return;
+            dot.style.background = '#6366f1';
+            setTimeout(() => { dot.style.background = '#22c55e'; }, 600);
+        }
+
+        // ── INVITE URL ──
+        async function handleInviteUrl(code) {
+            // 이미 내 방인지 확인
+            const existingRoom = Object.values(rooms).find(r => r.invite_code === code);
+            if (existingRoom) {
+                activeRoomId = existingRoom.id;
+                localStorage.setItem('moyo-active-room', activeRoomId);
+                return;
+            }
+
+            // Supabase에서 코드로 방 찾기
+            toast('모임 찾는 중...');
+            const { data } = await db.from('rooms').select('*').eq('invite_code', code).single();
+            if (!data) { toast('코드를 찾을 수 없어요'); return; }
+
+            // 멤버 추가
+            const alreadyMember = await db.from('members').select('id').eq('room_id', data.id).eq('user_id', ME.id).single();
+            if (!alreadyMember.data) {
+                await db.from('members').insert({ id: genId(), room_id: data.id, user_id: ME.id, att: 'none' });
+            }
+
+            rooms[data.id] = data;
+            if (!myRoomIds.includes(data.id)) myRoomIds.push(data.id);
+            activeRoomId = data.id;
+            localStorage.setItem('moyo-my-rooms', JSON.stringify(myRoomIds));
+            localStorage.setItem('moyo-active-room', activeRoomId);
+
+            await loadRoomData(data.id);
+            subscribeToRoom(data.id);
+            toast('🎉 ' + (data.name || '모임') + '에 참여했어요!');
+        }
+
+        // ── NAVIGATION ──
+        function goTab(id) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('on'));
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('on'));
+            document.getElementById('s-' + id).classList.add('on');
+            document.getElementById('tab-' + id).classList.add('on');
+            if (id === 'home') renderHome();
+            if (id === 'date') renderDates();
+            if (id === 'place') renderPlaces();
+            if (id === 'dutch') renderDutch();
+            if (id === 'memo') renderMemos();
+        }
+
+        function renderAll() {
+            const activeTab = document.querySelector('.tab.on')?.id?.replace('tab-', '') || 'home';
+            goTab(activeTab);
+        }
+
+        // ── HOME ──
+        function renderHome() {
+            const room = R();
+            const inp = document.getElementById('meeting-name');
+            if (inp && inp !== document.activeElement) inp.value = room.name || '';
+
+            const mbs = getMembers();
+            const exps = getExpenses();
+            const dts = getDates();
+            const goCount = mbs.filter(m => m.att === 'go').length;
+            const total = exps.reduce((s, e) => s + e.amt, 0);
+            const count = mbs.length || 1;
+            const per = total ? Math.ceil(total / count) : 0;
+            const best = [...dts].sort((a, b) => (b.voters?.length || 0) - (a.voters?.length || 0))[0];
+
+            document.getElementById('hs-att').textContent = goCount || '—';
+            document.getElementById('hs-date').textContent = best?.voters?.length > 0 ? best.label.split(' ')[0] : (dts.length ? dts.length + '개' : '—');
+            document.getElementById('hs-cost').textContent = per ? '₩' + per.toLocaleString() : '—';
+            document.getElementById('qv-date').textContent = dts.length ? dts.length + '개' : '투표';
+            document.getElementById('qv-place').textContent = getPlaces().length ? getPlaces().length + '개' : '후보';
+            document.getElementById('qv-dutch').textContent = per ? '₩' + per.toLocaleString() : '더치';
+            document.getElementById('qv-memo').textContent = getMemos().length ? getMemos().length + '개' : '메모';
+
+            // 프로필 버튼
+            if (ME) {
+                const av = document.getElementById('me-avatar');
+                const nl = document.getElementById('me-name-lbl');
+                if (av) av.textContent = ME.avatar;
+                if (nl) nl.textContent = ME.name;
+            }
+
+            // 멤버
+            const cnt = mbs.length;
+            document.getElementById('member-count-lbl').textContent = cnt ? cnt + '명 참여 중' : '아직 아무도 없어요';
+
+            document.getElementById('member-area').innerHTML = mbs.map(m => {
+                const u = m.users || {};
+                const isMe = ME && m.user_id === ME.id;
+                const isH = m.user_id === room.host_id;
+                const dot = m.att === 'go' ? 'dot-go' : m.att === 'no' ? 'dot-no' : m.att === 'maybe' ? 'dot-maybe' : 'dot-none';
+                return `<div class="mpill${isH ? ' mpill-host' : isMe ? ' mpill-me' : ''}">
+      <span>${u.avatar || '👤'}</span>
+      <div class="att-dot ${dot}"></div>
+      <span>${u.name || '?'}${isMe ? ' (나)' : ''}${isH ? ' 👑' : ''}</span>
+      ${isMe ? `<button class="mpill-edit" onclick="openProfile()">✏️</button>` : ''}
+    </div>`;
+            }).join('');
+
+            const hint = document.getElementById('member-empty-hint');
+            if (hint) hint.innerHTML = cnt === 0 ? '<div style="font-size:12px;color:var(--ink3);text-align:center;padding:10px 0">아래 초대 버튼으로 친구를 불러보세요 👇</div>' : '';
+
+            document.getElementById('invite-code').textContent = room.invite_code || '—';
+
+            // 총무 배너
+            const banner = document.getElementById('host-info-banner');
+            if (banner) {
+                const hostMember = mbs.find(m => m.user_id === room.host_id);
+                const hostName = hostMember?.users?.name || '알 수 없음';
+                banner.innerHTML = isHost()
+                    ? `<div class="host-banner host-banner-me">👑 내가 총무예요 · <button class="btn-text-link" onclick="openHostPass()">총무 넘기기</button></div>`
+                    : `<div class="host-banner">👑 총무: <b>${hostName}</b></div>`;
+            }
+
+            renderMeetingsList();
+        }
+
+        async function onNameChange() {
+            const name = document.getElementById('meeting-name').value;
+            if (!rooms[activeRoomId]) return;
+            rooms[activeRoomId].name = name;
+            await db.from('rooms').update({ name }).eq('id', activeRoomId);
+            renderMeetingsList();
+        }
+
+        // ── MEETINGS LIST ──
+        function renderMeetingsList() {
+            const wrap = document.getElementById('meetings-list');
+            if (!wrap) return;
+            wrap.innerHTML = myRoomIds.map(id => {
+                const r = rooms[id] || {};
+                const mbs = members[id] || [];
+                const exps = expenses[id] || [];
+                const dts = dates[id] || [];
+                const isCur = id === activeRoomId;
+                const isH = ME && r.host_id === ME.id;
+                const total = exps.reduce((s, e) => s + e.amt, 0);
+                const going = mbs.filter(m => m.att === 'go').length;
+                const meta = [mbs.length + '명', dts.length ? '📅' + dts.length : '', going ? '✅' + going : '', total ? '₩' + total.toLocaleString() : ''].filter(Boolean).join(' · ');
+                return `<div class="mt-card${isCur ? ' cur' : ''}" onclick="switchRoom('${id}')">
+      <div class="mt-ico">${r.emoji || '🎉'}</div>
+      <div class="mt-info">
+        <div class="mt-name">${r.name || '이름 없는 모임'}</div>
+        <div class="mt-meta">${meta || '아직 내용 없음'}</div>
+      </div>
+      ${isCur ? '<div class="mt-badge">현재</div>' : ''}
+      ${isH ? '<div class="mt-host-badge">👑</div>' : ''}
+      ${myRoomIds.length > 1 ? `<button class="mt-del" onclick="leaveRoom('${id}',event)">🚪</button>` : ''}
+    </div>`;
+            }).join('');
+        }
+
+        async function switchRoom(id) {
+            activeRoomId = id;
+            localStorage.setItem('moyo-active-room', id);
+            await loadRoomData(id);
+            subscribeToRoom(id);
+            renderAll();
+            toast((rooms[id]?.name || '모임') + '으로 전환됐어요');
+        }
+
+        async function leaveRoom(id, e) {
+            e.stopPropagation();
+            const r = rooms[id] || {};
+            if (!confirm((r.name || '모임') + '에서 나갈까요?')) return;
+            // 내 멤버십 삭제
+            await db.from('members').delete().eq('room_id', id).eq('user_id', ME.id);
+            myRoomIds = myRoomIds.filter(x => x !== id);
+            delete rooms[id];
+            if (activeRoomId === id) {
+                activeRoomId = myRoomIds[0] || null;
+                localStorage.setItem('moyo-active-room', activeRoomId || '');
+                if (activeRoomId) await loadRoomData(activeRoomId);
+            }
+            localStorage.setItem('moyo-my-rooms', JSON.stringify(myRoomIds));
+            renderAll();
+            toast('나왔어요');
+        }
+
+        // ── INVITE ──
+        function openInvite() { openSheet('invite'); }
+        function copyInviteLink() {
+            const url = `${location.href.split('?')[0]}?join=${R().invite_code}`;
+            copyText(url);
+            toast('초대 링크 복사됐어요! 카톡에 붙여넣으세요 🎉');
+            closeSheet('invite');
+        }
+        function copyCode() { copyText(R().invite_code); toast('코드 복사됐어요!'); }
+
+        // ── JOIN ──
+        async function joinMeeting() {
+            const code = document.getElementById('join-code-inp').value.trim().toUpperCase();
+            if (code.length !== 6) { toast('6자리 코드를 입력해 주세요'); return; }
+            closeSheet('join');
+            await handleInviteUrl(code);
+            renderAll();
+        }
+
+        // ── CREATE MEETING ──
+        function openCreateMeeting() {
+            document.getElementById('emoji-picker').innerHTML = MT_EMOJIS.map((e, i) =>
+                `<button onclick="selectEmoji(this,'${e}')" style="font-size:24px;background:${i === 0 ? 'var(--acc-l)' : 'var(--line2)'};border:1.5px solid ${i === 0 ? 'var(--acc-b)' : 'transparent'};border-radius:10px;width:42px;height:42px;cursor:pointer;transition:all .15s;" id="ep-${i}">${e}</button>`
+            ).join('');
+            selectedEmoji = MT_EMOJIS[0];
+            openSheet('create');
+        }
+
+        function selectEmoji(el, em) {
+            document.querySelectorAll('[id^="ep-"]').forEach(b => { b.style.background = 'var(--line2)'; b.style.borderColor = 'transparent'; });
+            el.style.background = 'var(--acc-l)'; el.style.borderColor = 'var(--acc-b)';
+            selectedEmoji = em;
+        }
+
+        async function createMeeting() {
+            const name = document.getElementById('new-meeting-name').value.trim();
+            if (!name) { toast('모임 이름을 입력해 주세요'); return; }
+            const roomId = genId();
+            const room = { id: roomId, name, emoji: selectedEmoji, host_id: ME.id, invite_code: genCode() };
+            await db.from('rooms').insert(room);
+            await db.from('members').insert({ id: genId(), room_id: roomId, user_id: ME.id, att: 'none' });
+
+            rooms[roomId] = room;
+            members[roomId] = [{ id: genId(), room_id: roomId, user_id: ME.id, att: 'none', users: ME }];
+            dates[roomId] = []; places[roomId] = []; expenses[roomId] = []; memos[roomId] = [];
+
+            myRoomIds.push(roomId);
+            activeRoomId = roomId;
+            localStorage.setItem('moyo-my-rooms', JSON.stringify(myRoomIds));
+            localStorage.setItem('moyo-active-room', activeRoomId);
+            subscribeToRoom(roomId);
+
+            closeSheet('create');
+            renderAll();
+            toast('🎉 ' + name + ' 만들어졌어요!');
+        }
+
+        // ── PROFILE ──
+        function openProfile() {
+            if (!ME) return;
+            profileAvatar = ME.avatar;
+            const grid = document.getElementById('profile-av-grid');
+            grid.innerHTML = AVATARS.slice(0, 8).map(a =>
+                `<button class="av-btn${a === ME.avatar ? ' on' : ''}" onclick="selectProfileAvatar(this,'${a}')">${a}</button>`
+            ).join('');
+            document.getElementById('profile-name-inp').value = ME.name;
+            openSheet('profile');
+        }
+
+        function selectProfileAvatar(el, av) {
+            document.querySelectorAll('#profile-av-grid .av-btn').forEach(b => b.classList.remove('on'));
+            el.classList.add('on');
+            profileAvatar = av;
+        }
+
+        async function saveProfile() {
+            const newName = document.getElementById('profile-name-inp').value.trim();
+            if (!newName) { toast('닉네임을 입력해 주세요'); return; }
+            ME.name = newName;
+            ME.avatar = profileAvatar || ME.avatar;
+            localStorage.setItem('moyo-me', JSON.stringify(ME));
+            await db.from('users').upsert({ id: ME.id, name: ME.name, avatar: ME.avatar });
+            closeSheet('profile');
+            renderHome();
+            toast('프로필이 변경됐어요! 👤');
+        }
+
+        // ── HOST PASS ──
+        function openHostPass() {
+            if (!isHost()) { toast('총무만 넘길 수 있어요'); return; }
+            const others = getMembers().filter(m => m.user_id !== ME.id);
+            if (!others.length) { toast('넘길 멤버가 없어요'); return; }
+            document.getElementById('hostpass-list').innerHTML = others.map(m => {
+                const u = m.users || {};
+                return `<div class="row" style="cursor:pointer" onclick="passHost('${m.user_id}')">
+      <span style="font-size:20px">${u.avatar || '👤'}</span>
+      <div style="flex:1;font-size:14px;font-weight:700">${u.name || '?'}</div>
+      <button class="btn btn-acc btn-xs">총무 넘기기</button>
+    </div>`;
+            }).join('');
+            openSheet('hostpass');
+        }
+
+        async function passHost(uid) {
+            const m = getMembers().find(x => x.user_id === uid);
+            if (!m) return;
+            const u = m.users || {};
+            if (!confirm(`${u.name || '?'}님에게 총무를 넘길까요?`)) return;
+            await db.from('rooms').update({ host_id: uid }).eq('id', activeRoomId);
+            rooms[activeRoomId].host_id = uid;
+            closeSheet('hostpass');
+            renderHome();
+            toast(`👑 ${u.name || '?'}님이 새 총무가 됐어요!`);
+        }
+
+        // ── DATE ──
+        async function addDate() {
+            const d = document.getElementById('date-inp').value;
+            const t = document.getElementById('time-inp').value.trim();
+            if (!d) { toast('날짜를 선택해 주세요'); return; }
+            const label = fmtDate(d) + (t ? ' ' + t : '');
+            if (getDates().find(x => x.label === label)) { toast('이미 있는 날짜예요'); return; }
+            const row = { id: genId(), room_id: activeRoomId, label, voters: [], added_by: ME?.id };
+            await db.from('dates').insert(row);
+            dates[activeRoomId] = [...getDates(), row];
+            renderDates();
+            toast('날짜 추가됐어요!');
+        }
+
+        async function voteDate(id) {
+            if (!ME) { toast('먼저 프로필을 설정해 주세요'); return; }
+            const d = getDates().find(x => x.id === id);
+            if (!d) return;
+            const voters = d.voters || [];
+            const idx = voters.indexOf(ME.id);
+            const newVoters = idx >= 0 ? voters.filter(v => v !== ME.id) : [...voters, ME.id];
+            await db.from('dates').update({ voters: newVoters }).eq('id', id);
+            d.voters = newVoters;
+            renderDates();
+        }
+
+        async function removeDate(id) {
+            const d = getDates().find(x => x.id === id);
+            if (!isHost() && !(ME && d?.added_by === ME.id)) { toast('총무 또는 본인이 추가한 날짜만 삭제 가능해요'); return; }
+            await db.from('dates').delete().eq('id', id);
+            dates[activeRoomId] = getDates().filter(x => x.id !== id);
+            renderDates();
+        }
+
+        function renderDates() {
+            const dts = getDates();
+            const wrap = document.getElementById('date-list');
+            if (!dts.length) {
+                wrap.innerHTML = '<div class="empty"><div class="empty-icon">📅</div><div class="empty-text">날짜 후보를 추가해 보세요</div></div>';
+            } else {
+                const sorted = [...dts].sort((a, b) => (b.voters?.length || 0) - (a.voters?.length || 0));
+                const maxV = Math.max(...sorted.map(d => d.voters?.length || 0), 1);
+                const topVotes = sorted[0].voters?.length || 0;
+                const topId = (sorted.length > 1 && topVotes > 0 && (sorted[1].voters?.length || 0) < topVotes) ? sorted[0].id : null;
+                wrap.innerHTML = sorted.map(d => {
+                    const vCount = d.voters?.length || 0;
+                    const myVote = d.voters?.includes(ME?.id);
+                    return `<div class="row${d.id === topId ? ' date-best' : ''}">
+        <div class="d-label">
+          <div class="d-title">${d.label}</div>
+          <div class="vote-bar"><div class="vote-fill" style="width:${vCount / maxV * 100}%"></div></div>
+          <div class="d-meta">${vCount}명 가능${d.id === topId ? ' · 👑 최다' : ''}</div>
+        </div>
+        <button class="vote-btn${myVote ? ' on' : ''}" onclick="voteDate('${d.id}')">${myVote ? '✅ 가능' : '🙋 가능'}</button>
+        ${(isHost() || (ME && d.added_by === ME.id)) ? `<button class="del-btn" onclick="removeDate('${d.id}')">✕</button>` : ''}
+      </div>`;
+                }).join('');
+            }
+
+            // 참석 여부
+            const mbs = getMembers();
+            const sec = document.getElementById('att-section');
+            if (!mbs.length) { sec.innerHTML = ''; return; }
+            const goC = mbs.filter(m => m.att === 'go').length;
+            const noC = mbs.filter(m => m.att === 'no').length;
+            const mayC = mbs.filter(m => m.att === 'maybe').length;
+            const noneC = mbs.filter(m => m.att === 'none').length;
+            sec.innerHTML = `
+    <div class="sec">참석 여부</div>
+    <div class="card">
+      <div class="att-bar">
+        ${goC ? `<span class="att-chip att-chip-go">✅ 참석 ${goC}</span>` : ''}
+        ${noC ? `<span class="att-chip att-chip-no">❌ 불참 ${noC}</span>` : ''}
+        ${mayC ? `<span class="att-chip att-chip-maybe">❓ 미정 ${mayC}</span>` : ''}
+        ${noneC ? `<span class="att-chip att-chip-none">⬜ 미응답 ${noneC}</span>` : ''}
+      </div>
+      ${mbs.map(m => {
+                const u = m.users || {};
+                const isMe = ME && m.user_id === ME.id;
+                return `<div class="row">
+          <span style="font-size:18px">${u.avatar || '👤'}</span>
+          <div style="flex:1;font-size:14px;font-weight:700">${u.name || '?'}${isMe ? ' <span style="font-size:11px;color:var(--ink3)">(나)</span>' : ''}</div>
+          ${isMe ? `<div class="att-btns">
+            <button class="att-btn${m.att === 'go' ? ' go' : ''}" onclick="setAtt('${m.id}','go')">참석</button>
+            <button class="att-btn${m.att === 'no' ? ' no' : ''}" onclick="setAtt('${m.id}','no')">불참</button>
+            <button class="att-btn${m.att === 'maybe' ? ' maybe' : ''}" onclick="setAtt('${m.id}','maybe')">미정</button>
+          </div>`: `<span class="badge ${m.att === 'go' ? 'badge-green' : m.att === 'no' ? 'badge-red' : m.att === 'maybe' ? 'badge-amber' : 'badge-gray'}">${m.att === 'go' ? '✅ 참석' : m.att === 'no' ? '❌ 불참' : m.att === 'maybe' ? '❓ 미정' : '⬜ 미응답'}</span>`}
+        </div>`;
+            }).join('')}
+    </div>`;
+        }
+
+        async function setAtt(memberId, status) {
+            const m = getMembers().find(x => x.id === memberId);
+            if (!m) return;
+            const newAtt = m.att === status ? 'none' : status;
+            await db.from('members').update({ att: newAtt }).eq('id', memberId);
+            m.att = newAtt;
+            renderDates(); renderHome();
+        }
+
+        function fmtDate(s) {
+            const d = new Date(s + 'T00:00:00');
+            return d.toLocaleDateString('ko-KR', { month: 'long', day: 'numeric', weekday: 'short' });
+        }
+
+        // ── PLACE ──
+        async function addPlace() {
+            const name = document.getElementById('place-name').value.trim();
+            const cat = document.getElementById('place-cat').value.trim();
+            const price = document.getElementById('place-price').value.trim();
+            if (!name) { toast('장소 이름을 입력해 주세요'); return; }
+            const row = { id: genId(), room_id: activeRoomId, name, cat: cat || '기타', price, liked_by: [], added_by: ME?.id };
+            await db.from('places').insert(row);
+            places[activeRoomId] = [...getPlaces(), row];
+            renderPlaces();
+            ['place-name', 'place-cat', 'place-price'].forEach(id => document.getElementById(id).value = '');
+            toast(name + ' 추가됐어요!');
+        }
+
+        async function likePlace(id) {
+            if (!ME) { toast('먼저 프로필을 설정해 주세요'); return; }
+            const p = getPlaces().find(x => x.id === id);
+            if (!p) return;
+            const liked = p.liked_by || [];
+            const idx = liked.indexOf(ME.id);
+            const newLiked = idx >= 0 ? liked.filter(v => v !== ME.id) : [...liked, ME.id];
+            await db.from('places').update({ liked_by: newLiked }).eq('id', id);
+            p.liked_by = newLiked;
+            renderPlaces();
+        }
+
+        async function removePlace(id) {
+            const p = getPlaces().find(x => x.id === id);
+            if (!isHost() && !(ME && p?.added_by === ME.id)) { toast('총무 또는 본인이 추가한 장소만 삭제 가능해요'); return; }
+            await db.from('places').delete().eq('id', id);
+            places[activeRoomId] = getPlaces().filter(x => x.id !== id);
+            renderPlaces();
+        }
+
+        function renderPlaces() {
+            const wrap = document.getElementById('place-list');
+            const pls = getPlaces();
+            if (!pls.length) { wrap.innerHTML = '<div class="empty"><div class="empty-icon">📍</div><div class="empty-text">장소 후보를 추가해 보세요</div></div>'; return; }
+            const sorted = [...pls].sort((a, b) => (b.liked_by?.length || 0) - (a.liked_by?.length || 0));
+            wrap.innerHTML = sorted.map((p, i) => {
+                const liked = p.liked_by?.includes(ME?.id);
+                const canDel = isHost() || (ME && p.added_by === ME.id);
+                return `<div class="row">
+      <div class="rank${i === 0 && (p.liked_by?.length || 0) > 0 ? ' top' : ''}">${i + 1}</div>
+      <div class="pl-info"><div class="pl-name">${p.name}</div><div class="pl-meta">${p.cat}${p.price ? ' · ' + p.price : ''}</div></div>
+      <button class="like-btn${liked ? ' on' : ''}" onclick="likePlace('${p.id}')">${liked ? '❤️' : '🤍'} ${p.liked_by?.length || 0}</button>
+      ${canDel ? `<button class="del-btn" onclick="removePlace('${p.id}')">✕</button>` : ''}
+    </div>`;
+            }).join('');
+        }
+
+        function suggestPlaces(cat) {
+            const list = SUGGEST_DATA[cat] || [];
+            document.getElementById('sug-wrap').innerHTML = `<div style="border-top:1px solid var(--line2);margin-top:10px;padding-top:10px">
+    ${list.map(p => `<div class="sug-row">
+      <div class="sug-info"><div class="sug-name">${p.name}</div><div class="sug-meta">${p.cat} · ${p.price}</div></div>
+      <button class="btn btn-line btn-xs" onclick="quickPlace('${p.name}','${p.cat}','${p.price}')">추가</button>
+    </div>`).join('')}
+  </div>`;
+        }
+
+        async function quickPlace(name, cat, price) {
+            if (getPlaces().find(p => p.name === name)) { toast('이미 있어요'); return; }
+            const row = { id: genId(), room_id: activeRoomId, name, cat, price, liked_by: [], added_by: ME?.id };
+            await db.from('places').insert(row);
+            places[activeRoomId] = [...getPlaces(), row];
+            renderPlaces(); toast(name + ' 추가됐어요!');
+        }
+
+        // ── DUTCH ──
+        function renderDutch() {
+            const mbs = getMembers();
+            const exps = getExpenses();
+            const count = mbs.length || 1;
+            const total = exps.reduce((s, e) => s + e.amt, 0);
+            const per = Math.ceil(total / count);
+            document.getElementById('d-total').textContent = '₩' + total.toLocaleString();
+            document.getElementById('d-per').textContent = '₩' + per.toLocaleString();
+            document.getElementById('d-count').textContent = count + '명 기준';
+
+            const addArea = document.getElementById('dutch-add-area');
+            if (isHost()) {
+                addArea.innerHTML = `<div class="card card-p" style="margin-bottom:12px">
+      <div style="font-size:11px;font-weight:700;color:var(--ink3);letter-spacing:.5px;margin-bottom:10px">지출 추가 <span class="badge badge-gold">👑 총무</span></div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div class="inp-row">
+          <input class="inp" id="exp-name" placeholder="항목 (예: 삼겹살)">
+          <input class="inp" type="number" id="exp-amt" placeholder="금액" style="max-width:110px">
+        </div>
+        <div class="inp-row">
+          <input class="inp" id="exp-payer" placeholder="낸 사람">
+          <button class="btn btn-acc btn-sm" onclick="addExpense()" style="flex-shrink:0">추가</button>
+        </div>
+      </div>
+    </div>`;
+            } else {
+                addArea.innerHTML = `<div class="lock-hint">🔒 총무만 지출을 추가할 수 있어요</div>`;
+            }
+
+            const expW = document.getElementById('exp-list');
+            expW.innerHTML = exps.length
+                ? exps.map(e => `<div class="row">
+        <div style="flex:1"><div style="font-size:14px;font-weight:700">${e.name}</div><div style="font-size:11px;color:var(--ink3);margin-top:2px">${e.payer} 결제</div></div>
+        <div style="font-size:15px;font-weight:800">₩${e.amt.toLocaleString()}</div>
+        ${isHost() ? `<button class="del-btn" onclick="removeExpense('${e.id}')">✕</button>` : ''}
+      </div>`).join('')
+                : '<div class="empty"><div class="empty-icon">💸</div><div class="empty-text">지출 내역이 없어요</div></div>';
+
+            const settW = document.getElementById('settle-result');
+            if (!exps.length || mbs.length < 2) {
+                settW.innerHTML = `<div class="card card-p" style="text-align:center;color:var(--ink3);font-size:13px">멤버 2명 이상 + 지출 추가 후 결과가 나와요</div>`;
+                return;
+            }
+            const memberNames = mbs.map(m => m.users?.name || '?');
+            const paid = {}; memberNames.forEach(n => { paid[n] = 0; });
+            exps.forEach(e => { if (paid.hasOwnProperty(e.payer)) paid[e.payer] += e.amt; });
+            const bal = {}; memberNames.forEach(n => { bal[n] = (paid[n] || 0) - per; });
+            const cred = Object.entries(bal).filter(([, v]) => v > 0).map(([n, v]) => ({ n, v }));
+            const debt = Object.entries(bal).filter(([, v]) => v < 0).map(([n, v]) => ({ n, v: Math.abs(v) }));
+            const lines = []; let ci = 0, di = 0;
+            while (ci < cred.length && di < debt.length) {
+                const pay = Math.min(cred[ci].v, debt[di].v);
+                if (pay > 100) lines.push({ from: debt[di].n, to: cred[ci].n, amt: Math.round(pay) });
+                cred[ci].v -= pay; debt[di].v -= pay;
+                if (cred[ci].v < 100) ci++; if (debt[di].v < 100) di++;
+            }
+            settW.innerHTML = lines.length
+                ? lines.map(s => `<div class="settle-card"><span class="sf">${s.from}</span><span style="color:var(--ink3);font-size:11px">→</span><span class="st">${s.to}</span><span class="sa">₩${s.amt.toLocaleString()}</span></div>`).join('')
+                : `<div class="settle-card" style="justify-content:center;color:var(--green);font-weight:700">✅ 1인당 ₩${per.toLocaleString()} 균등 정산!</div>`;
+        }
+
+        async function addExpense() {
+            const name = document.getElementById('exp-name').value.trim();
+            const amt = parseInt(document.getElementById('exp-amt').value) || 0;
+            const payer = document.getElementById('exp-payer').value.trim();
+            if (!name || !amt) { toast('항목과 금액을 입력해 주세요'); return; }
+            const row = { id: genId(), room_id: activeRoomId, name, amt, payer: payer || '미지정', added_by: ME?.id };
+            await db.from('expenses').insert(row);
+            expenses[activeRoomId] = [...getExpenses(), row];
+            renderDutch();
+            ['exp-name', 'exp-amt', 'exp-payer'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+            toast('지출 추가됐어요!');
+        }
+
+        async function removeExpense(id) {
+            await db.from('expenses').delete().eq('id', id);
+            expenses[activeRoomId] = getExpenses().filter(e => e.id !== id);
+            renderDutch();
+        }
+
+        // ── MEMO ──
+        function setMemoType(type) {
+            memoType = type;
+            document.getElementById('tb-notice').classList.toggle('on', type === 'notice');
+            document.getElementById('tb-memo').classList.toggle('on', type === 'memo');
+        }
+
+        async function addMemo() {
+            const text = document.getElementById('memo-inp').value.trim();
+            if (!text) { toast('내용을 입력해 주세요'); return; }
+            const row = { id: genId(), room_id: activeRoomId, type: memoType, text, author_id: ME?.id, author_name: ME?.name || '익명' };
+            await db.from('memos').insert(row);
+            memos[activeRoomId] = [row, ...getMemos()];
+            renderMemos();
+            document.getElementById('memo-inp').value = '';
+            toast(memoType === 'notice' ? '📢 공지 등록됐어요!' : '📝 메모 등록됐어요!');
+        }
+
+        async function removeMemo(id) {
+            const m = getMemos().find(x => x.id === id);
+            if (!isHost() && !(ME && m?.author_id === ME.id)) { toast('총무 또는 작성자만 삭제 가능해요'); return; }
+            await db.from('memos').delete().eq('id', id);
+            memos[activeRoomId] = getMemos().filter(x => x.id !== id);
+            renderMemos();
+        }
+
+        function renderMemos() {
+            const wrap = document.getElementById('memo-list');
+            const mos = getMemos();
+            wrap.innerHTML = mos.length
+                ? mos.map(m => `<div class="memo-item">
+        <div class="memo-top">
+          <span class="badge ${m.type === 'notice' ? 'badge-acc' : 'badge-gray'}">${m.type === 'notice' ? '📢 공지' : '📝 메모'}</span>
+          <div class="memo-body">${m.text.replace(/\n/g, '<br>')}</div>
+          ${(isHost() || (ME && m.author_id === ME.id)) ? `<button class="del-btn" onclick="removeMemo('${m.id}')">✕</button>` : ''}
+        </div>
+        <div class="memo-time">${m.author_name} · ${new Date(m.created_at).toLocaleString('ko-KR', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</div>
+      </div>`).join('')
+                : '<div class="empty"><div class="empty-icon">📝</div><div class="empty-text">공지나 메모를 작성해 보세요</div></div>';
+        }
+
+        // ── SHARE ──
+        function openShare() {
+            const room = R(); const mbs = getMembers(); const exps = getExpenses();
+            const total = exps.reduce((s, e) => s + e.amt, 0);
+            const count = mbs.length || 1; const per = Math.ceil(total / count);
+            const best = [...getDates()].sort((a, b) => (b.voters?.length || 0) - (a.voters?.length || 0))[0];
+            const topPl = [...getPlaces()].sort((a, b) => (b.liked_by?.length || 0) - (a.liked_by?.length || 0))[0];
+            const going = mbs.filter(m => m.att === 'go');
+            const notices = getMemos().filter(m => m.type === 'notice');
+            let t = `🎉 ${room.name || '우리 모임'} 정산 요약\n${'─'.repeat(22)}\n`;
+            if (best?.voters?.length > 0) t += `📅 날짜: ${best.label} (${best.voters.length}명 가능)\n`;
+            if (topPl) t += `📍 장소: ${topPl.name}${topPl.price ? ' (' + topPl.price + ')' : ''}\n`;
+            if (going.length) t += `✅ 참석: ${going.map(m => m.users?.name || '?').join(', ')}\n`;
+            t += `\n💰 지출 내역\n`;
+            exps.forEach(e => { t += `• ${e.name}: ₩${e.amt.toLocaleString()} (${e.payer})\n`; });
+            t += `\n총액: ₩${total.toLocaleString()}\n1인당: ₩${per.toLocaleString()} (${count}명)\n`;
+            if (notices.length) { t += `\n📢 공지\n`; notices.forEach(n => { t += `• ${n.text}\n`; }); }
+            t += `\n모여 앱으로 만들었어요 🎉`;
+            document.getElementById('share-text').textContent = t;
+            openSheet('share');
+        }
+
+        function copyShare() { copyText(document.getElementById('share-text').textContent); toast('복사됐어요! 카톡에 붙여넣으세요 💬'); closeSheet('share'); }
+
+        // ── SHEET UTILS ──
+        function openSheet(id) { document.getElementById('ov-' + id).classList.add('on'); }
+        function closeSheet(id) { document.getElementById('ov-' + id).classList.remove('on'); }
+        function closeOv(id, e) { if (e.target.id === 'ov-' + id) closeSheet(id); }
+
+        // ── COPY ──
+        function copyText(t) {
+            if (navigator.clipboard) navigator.clipboard.writeText(t);
+            else { const ta = document.createElement('textarea'); ta.value = t; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); }
+        }
+
+        // ── TOAST ──
+        let _tt;
+        function toast(msg) {
+            const el = document.getElementById('toast');
+            el.textContent = msg; el.classList.add('on');
+            clearTimeout(_tt); _tt = setTimeout(() => el.classList.remove('on'), 2400);
+        }
+
+        // ── WINDOW EXPOSE ──
+        Object.assign(window, {
+            goTab, completeOnboarding, selectAvatar,
+            openInvite, copyInviteLink, copyCode,
+            joinMeeting, openCreateMeeting, selectEmoji, createMeeting,
+            switchRoom, leaveRoom,
+            openProfile, selectProfileAvatar, saveProfile,
+            openHostPass, passHost,
+            addDate, voteDate, removeDate, setAtt,
+            addPlace, likePlace, removePlace, suggestPlaces, quickPlace,
+            addExpense, removeExpense,
+            setMemoType, addMemo, removeMemo,
+            openShare, copyShare,
+            openSheet, closeSheet, closeOv,
+            onNameChange, toast,
+        });
+
+        // ── START ──
+        init();
+    </script>
+</body>
+
+</html>
